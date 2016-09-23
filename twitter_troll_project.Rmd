@@ -1,0 +1,50 @@
+---
+title: "Twitter Troll Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Collecting data
+### Downloading tweets
+Tutorial: R Twitter mining:
+<https://www.youtube.com/watch?v=lT4Kosc_ers>.
+Authorization
+```{r,oauth}
+library('RCurl')
+library('twitteR')
+source('twitter_api.R')
+library(readr)
+setup_twitter_oauth(consumer_key, consumer_secret,
+                    access_token, access_secret)
+```
+
+Download Tweets:
+```{r}
+swift_tweets = searchTwitter('Taylor Swift', n = 10, lang = 'en')
+# How to pick n?
+head(swift_tweets,5)
+# lapply(swift_tweets, write, "swift_tweets.txt", append=TRUE, ncolumns=1000)
+```
+
+### Retrieve user list
+First find a famous person, e.g., Taylor swift. Then extract the users who tweeted about her.
+```{r}
+# users = vector(length = length(swift_tweets))
+# for (i in 1:length(swift_tweets)){
+#     users[1] = gsub(":.*", "", swift_tweets[[i]])
+# }
+# # users = sapply(swift_tweets, function(x) gsub(":.*","",x))
+```
+
+## Methods
+1. English swear words list: <http://www.youswear.com/index.asp?language=English>.
+
+Grab the usernames from all tweets: compute the frequency of swear words in their tweets.
+
+<!-- 2. Retrieve user information -->
+<!-- ```{r,userinfo} -->
+<!-- swift.info = lookupUsers('taylorswift13') -->
+<!-- ``` -->
