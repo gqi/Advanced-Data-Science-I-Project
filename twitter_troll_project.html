@@ -121,16 +121,17 @@ $(document).ready(function () {
 
 <div id="definition-of-troll" class="section level3">
 <h3>Definition of troll</h3>
+<p>In my definition, Twitter trolls includes two categories:</p>
 <ol style="list-style-type: decimal">
-<li>If a person’s tweets often contains swear words.</li>
-<li>If a person’s tweets often spark many comments that contain swear words.</li>
+<li><p>If a person’s tweets often contains swear words.</p></li>
+<li><p>If a person’s tweets often spark  comments that contain swear words. These tweets may not contain curse words, but they are provocative in nature. The comments, which is a large pool, are highly likely to contain swear words.</p></li>
 </ol>
 </div>
 <div id="collecting-data" class="section level2">
 <h2>Collecting data</h2>
 <div id="retrieve-user-list" class="section level3">
 <h3>Retrieve user list</h3>
-<p>We cannot work with all Twitter users since this pool is too big. Instead, we work with the 100 most followed users <a href="http://twittercounter.com/pages/100" class="uri">http://twittercounter.com/pages/100</a>. Grad all users in this list:</p>
+<p>We cannot work with all Twitter users since this pool is too big. Instead, we work with the 100 most followed users <a href="http://twittercounter.com/pages/100" class="uri">http://twittercounter.com/pages/100</a>. Grab all users in this list:</p>
 <p>First load packages:</p>
 <pre class="r"><code>library('RCurl')</code></pre>
 <pre><code>## Loading required package: bitops</code></pre>

@@ -1,6 +1,6 @@
 ---
 title: "Twitter Troll Project"
-output: pdf_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -8,13 +8,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ### Definition of troll
-(1) If a person's tweets often contains swear words.
-(2) If a person's tweets often spark many comments that contain swear words.
+In my definition, Twitter trolls includes two categories:
+
+(1) If a person's tweets often contains swear words. 
+
+(2) If a person's tweets often spark \textbf{many} comments that contain swear words. These tweets may not contain curse words, but they are provocative in nature. The comments, which is a large pool, are highly likely to contain swear words.
 
 ## Collecting data
 ### Retrieve user list
 We cannot work with all Twitter users since this pool is too big. Instead, we work with the 100 most followed users <http://twittercounter.com/pages/100>.
-Grad all users in this list:
+Grab all users in this list:
 
 First load packages:
 ```{r, load_package}
