@@ -12,7 +12,7 @@ In my definition, Twitter trolls includes two categories:
 
 (1) If a person's tweets often contains swear words. 
 
-(2) If a person's tweets often spark \textbf{many} comments that contain swear words. These tweets may not contain curse words, but they are provocative in nature. The comments, which is a large pool, are highly likely to contain swear words.
+(2) If a person's tweets often spark many comments that contain swear words. These tweets may not contain curse words, but they are provocative in nature. The comments, which is a large pool, are highly likely to contain swear words.
 
 ## Collecting data
 ### Retrieve user list
