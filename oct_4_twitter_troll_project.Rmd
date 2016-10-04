@@ -70,20 +70,20 @@ Next, search tweets based on the information above. For each account in the top 
 tweets = vector('list', length = length(accounts))
 acct.search = paste0('from:',accounts)
 
-for (i in 1:length(accounts)){
-    tweets[[i]] = searchTwitter(acct.search[[i]], n = 5, lang = 'en', since = '2016-07-01', until = '2016-07-15')
-}
-save(tweets, file = 'raw_data/tweets_top100.RData')
+# for (i in 1:length(accounts)){
+#     tweets[[i]] = searchTwitter(acct.search[[i]], n = 5, lang = 'en', since = '2016-07-01', until = '2016-07-15')
+# }
+# save(tweets, file = 'raw_data/tweets_top100.RData')
 ```
 
 ```{r, download_tweets_sci}
 tweets.sci = vector('list', length = length(top50sci.id))
 acct.search = paste0('from:', top50sci.id)
 
-for (i in 1:length(acct.search)){
-    tweets.sci[[i]] = searchTwitter(acct.search[i], n = 10, lang = 'en', since='2016-07-01', until='2016-07-05')
-}
-save(tweets.sci, file = 'raw_data/tweets_top50sci.RData')
+# for (i in 1:length(acct.search)){
+#     tweets.sci[[i]] = searchTwitter(acct.search[i], n = 10, lang = 'en', since='2016-07-01', until='2016-07-05')
+# }
+# save(tweets.sci, file = 'raw_data/tweets_top50sci.RData')
 ```
 
 Different users allow access to different numbers of tweets:
@@ -108,7 +108,7 @@ swear = swear[swear!='']
 # Now clean the curse words dictionary swear and save it i vector swear.cl
 swear.cl = swear %>% sapply(strsplit, split = ' - ') %>%
     unlist %>% unique
-head(swear.cl)
+# head(swear.cl)
 ```
 
 Frequency of the swear words:
@@ -118,8 +118,64 @@ how to retrieve strings from S4 class?
 ```
 
 ## Next step for data collection
-(1) Number of times a tweet is retweeted.
-(2) Scrape the comments of the tweets.
+
+### Current problems in data collection
+1. The tweets scraped with R are fewer than what I see on the browser.
+2. Is there a rate limit if I scrape tweets without API?
+
+### Information about a particular tweet
+Google that tweet, the first entry links to the page containing all the needed information, including the number of likes, the number of retweets and reply from other people.
+
+Example: "Scientists use words differently than their usual meanings, causing confusion. Our future depends on a clear understanding of science.pic.twitter.com/Ol57Lba1X6"
+
+```{r}
+library('RCurl')
+library('twitteR')
+library('readr')
+library(rvest)
+library(dplyr)
+library(stringr)
+
+### Download account list
+top50_science_url = "http://www.sciencemag.org/news/2014/09/top-50-science-stars-twitter"
+htmlfile = read_html(top50_science_url)
+
+xpath.name = '//*[contains(concat( " ", @class, " " ), concat( " ", "k-index", " " )) and (((count(preceding-sibling::*) + 1) = 31) and parent::*)]//strong'
+nds.name = html_nodes(htmlfile, xpath = xpath.name)
+top50sci.name = html_text(nds.name)
+
+xpath.id = '//*[contains(concat( " ", @class, " " ), concat( " ", "k-index", " " )) and (((count(preceding-sibling::*) + 1) = 31) and parent::*)]//a'
+nds.id = html_nodes(htmlfile, xpath = xpath.id)
+top50sci.id = html_text(nds.id)
+top50sci.id = gsub('@', '', top50sci.id)
+
+write.table(data.frame(name = top50sci.name, id = top50sci.id), 'top50sci_twitter.txt')
+### Download tweets
+date.ls = seq(as.Date('2016-10-01'), as.Date('2016-09-06'), by = -5)
+tweets.sci = list()
+
+for (date in date.ls){
+    date = as.Date(date, origin = '1970-01-01')
+    print(date)
+    tweets.sci[[as.character(date)]] = list()
+    for (id in top50sci.id){
+        print(id)
+        tweets.url = paste0('https://twitter.com/search?q=from%3A', id, '%20since%3A', 
+                            as.character(date-5), '%20until%3A', as.character(date), '&src=typd&lang=en')
+        # tweets.url = "https://twitter.com/search?q=from%3AProfBrianCox%20since%3A2016-10-01%20until%3A2016-10-03&src=typd&lang=en"
+        htmlfile = read_html(tweets.url)
+        ## From 9-28 until 9-29 selects the tweets on 9-28
+        xpath.tweets = '//*[contains(concat( " ", @class, " " ), concat( " ", "tweet-text", " " ))]'
+        # xpath.tweets = '//*[(@id = "stream-items-id")]'
+        tw = html_nodes(htmlfile, xpath = xpath.tweets)
+        txt = html_text(tw)
+        print(txt)
+        tweets.sci[[as.character(date)]][[id]] = txt
+        Sys.sleep(30)
+    }
+    # names(tweets.sci[[id]]) = date.ls
+}
+```
 
 
 <!-- 2. Retrieve user information -->
