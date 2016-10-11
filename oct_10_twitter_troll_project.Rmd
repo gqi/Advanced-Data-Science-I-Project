@@ -1,0 +1,106 @@
+---
+title: "Detecting Twitter Trolls"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Progress since 10/4
+1. Focused on tweets instead of users, since it's hard to collect all the data for a user.
+
+2. Found 3 words lists: swear words <http://www.noswearing.com/dictionary>, insulting words <http://onlineslangdictionary.com/thesaurus/words+meaning+insults+(list+of).html>, bad words <https://www.cs.cmu.edu/~biglou/resources/bad-words.txt>. I combined 3 lists and remove repetitions.
+
+3. Downloaded tweets that are potentially related to Piit-Jolie divorce.
+
+4. Matched each tweet with the combined bad words list. The tweets with >98 percentile number of matched are considered trolls.
+
+```{r}
+library(RCurl)
+library(twitteR)
+library(readr)
+library(rvest)
+library(dplyr)
+library(stringr)
+
+load('raw_data/oct_10_tweets_swear.RData')
+swear = read.table('raw_data/swearwords_clean.txt',
+                   stringsAsFactors = FALSE)[,1]
+insult = read.table('raw_data/insultwords.txt',
+                    stringsAsFactors = FALSE)[,1]
+bad = read.table('raw_data/bad_words.txt',
+                 stringsAsFactors = FALSE)[,1]
+negwords = c(swear, insult, bad)
+negwords = unique(tolower(negwords))
+
+
+load('raw_data/oct_9_pitt_tweets.RData')
+load('raw_data/oct_9_aniston_tweets.RData')
+load('raw_data/oct_9_jolie_tweets.RData')
+load('raw_data/oct_9_pitt_divorce_tweets.RData')
+load('raw_data/oct_9_jolie_divorce_tweets.RData')
+load('raw_data/oct_9_pitt_jolie_tweets.RData')
+
+all.tweets = list(Pitt = tweets.pitt, 
+                  Jolie = tweets.jolie, 
+                  Aniston = tweets.aniston,
+                  Pitt_divorce = tweets.pitt.divorce,
+                  Jolie_divorce = tweets.jolie.divorce,
+                  Pitt_Jolie = tweets.pitt.jolie)
+swear.num = list()
+par(mfrow = c(2,3))
+for (keyword in names(all.tweets)){
+    tweetslist = all.tweets[[keyword]]
+    swear.num[[keyword]]  = vector(length = length(tweetslist))
+    for (i in 1:length(tweetslist)){
+        tweet = tweetslist[[i]]
+        text = gsub("[^a-zA-Z0-9 ]", '', tweet@.xData$text)
+        swear.num[[keyword]][i] = sum(sapply(1:length(negwords), function(x) length(grep(tolower(negwords[x]), tolower(text)))>=1))
+    }
+    thr = quantile(swear.num[[keyword]], 0.98)
+    hist(swear.num[[keyword]], xlab = 'Number of matched words', main = keyword)
+    abline(v = thr, col = 2)
+}
+```
+
+Print identified trolls
+```{r, print_troll}
+for (keyword in names(all.tweets)){
+    tweetslist = all.tweets[[keyword]]
+    print(paste0('TWEETS ABOUT ', keyword))
+    for (i in 1:length(tweetslist)){
+        if (swear.num[[keyword]][i] >= thr){
+            print(tweetslist[[i]])
+        }
+    }
+}
+```
+
+## Problems
+1. Some matched tweets are not trolls but highly critical.
+
+2. Hard to detect the trolls with no swear words.
+
+3. Whether a tweet is a troll depends on the link it points to.
+
+## Next step of troll identification
+1. Find a list of known trolls and a list of random tweets. Add to the dictionary the words of significantly different frequencies between two list (most known troll lists are in images instead of text).
+
+2. From the identified trolls, collect the words that have different frequencies with the list of random tweets and add to the dictionary.
+
+3. Open the link in a tweet and grab key words from the title.
+
+## Troll classification.
+Existing dictionary consists of different parts. May classify a troll based on word frequencies in different parts.
+
+<!-- 2. Potential strategy: based on each category in my definition of trolls, search for tweets that match such patterns. Create a dictionary by collecting words from the troll tweets. Then match other tweets with the dictionary. -->
+<!-- 3. How should we identify the tweets that contain no rude words but are trolls in nature. -->
+<!-- 4. One potential solution: we can match swear words list, sarcastic words list, and do sentiment analysis and pick the words that have negative sentiment. -->
+<!-- 5. Find a collection of known trolls, compare the word frequencies with random tweets, pick the ones with significant differences. -->
+
+<!-- ```{r cars} -->
+<!-- summary(cars) -->
+<!-- ``` -->
+
+
